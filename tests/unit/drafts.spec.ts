@@ -5,6 +5,13 @@ beforeEach(() => { vi.useFakeTimers(); sessionStorage.clear() })
 afterEach(() => vi.useRealTimers())
 const value = { title: 'Черновик', todos: [{ id: 't', text: '', completed: false }] }
 describe('draft persistence', () => {
+  it('reports failed removal and cancels the pending write anyway', () => {
+    const p = new DraftPersistence(sessionStorage, 'new')
+    p.schedule(value)
+    const spy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new Error('denied') })
+    p.clear(); spy.mockRestore(); vi.runAllTimers()
+    expect(p.read()).toBeNull()
+  })
   it('debounces writes and recovers the latest version', () => {
     const p = new DraftPersistence(sessionStorage, 'new'); p.schedule(value)
     vi.advanceTimersByTime(300); p.schedule({ title: 'Последний', todos: [] })

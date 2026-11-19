@@ -1,10 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EditorSession } from '../../app/lib/editor-session'
+import { reactive } from 'vue'
 
 const initial = () => ({ title: 'Начало', todos: [{ id: 'a', text: 'Первый', completed: false }] })
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 describe('editing session', () => {
+  it('supports the reactive session used by the editor', () => {
+    const s = reactive(new EditorSession(initial()))
+    s.add({ id: 'b', text: 'Второй', completed: false }); s.undo(); s.redo()
+    s.text('b', 'Правка'); s.remove('b'); s.undo(); s.undo()
+    expect(s.draft.todos[1]?.text).toBe('Второй')
+  })
   it('groups continuous input until blur', () => {
     const s = new EditorSession(initial()); s.text('title', 'Н'); s.text('title', 'Новый')
     s.flush(); s.undo(); expect(s.draft.title).toBe('Начало')
