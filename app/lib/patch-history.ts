@@ -17,7 +17,7 @@ export function applyPatch(draft: EditableNote, patch: Patch, direction: 'undo' 
     return
   }
   if ((patch.kind === 'insert') === forward) {
-    draft.todos.splice(patch.index, 0, structuredClone(patch.todo))
+    draft.todos.splice(patch.index, 0, structuredClone({ ...patch.todo }))
   } else {
     const index = draft.todos.findIndex(t => t.id === patch.todo.id)
     if (index !== -1) draft.todos.splice(index, 1)
